@@ -250,11 +250,19 @@ npx serve frontend -l 8000
 
 本项目从 0 到 1 全程由我一个人 + Hermes Agent 的四个核心 Skills 协作完成。以下是每个 Skill 的实际用法和在本项目中的体现：
 
-### 1. BMAD（项目脚手架 + 架构定义）
+### 1. BMAD（产品开发全流程引擎）
 
-BMAD 承担了两个职责：**脚手架搭建**（`bmad-builder`）生成了 `backend/`、`frontend/` 的目录骨架和 `.gitignore` 规则；**架构审查**（`bmad-architect`）定义了前后端分离的模块边界、RESTful API 契约和数据模型 JSON Schema，并在代码落地后跑了 gate-check 确认需求覆盖率。
+BMAD 不是一个单一技能，而是一个由 10 个子 Skill 组成的完整产品开发流水线。本项目中使用的关键链路：
 
-在本项目中，BMAD 产出的关键决策包括：前端纯静态 SPA 走 LocalStorage + Hash 路由、后端 JSON 文件存储 + `async-lock` 防并发、JWT 拦截受保护路由。
+**`bmad-orchestrator`（调度中枢）**：`bmad:init` 初始化项目状态，`bmad:next` 在每个阶段结束后自动推荐下一步，确保不走错顺序。
+
+**`bmad-analyst`（需求分析）**：执行 `bmad:product-brief`，通过结构化访谈梳理清楚 Slackr 要解决的核心问题——轻量团队需要一个不用装客户端、打开浏览器就能用的即时通讯工具。产出 product-brief.md。
+
+**`bmad-product-manager`（需求固化）**：先走 `bmad:inquiry` 做需求质询，确认 MVP 边界（做登陆/频道/消息/个人资料，不做文件共享/视频通话/搜索），再走 `bmad:prd` 输出正式 PRD 文档，定义 5 大功能模块和验收标准。
+
+**`bmad-architect`（架构定义）**：`bmad:architecture` 产出了前后端分离架构、RESTful API 契约、JSON 数据模型 Schema；`bmad:gate-check` 对需求覆盖率和 NFR（性能/安全/离线容灾）逐项打分，确认 PASS 后才进入开发。
+
+**`bmad-builder`（脚手架生成）**：基于架构决策生成了 `backend/`、`frontend/` 的目录骨架、`.gitignore` 规则和 `package.json` 基线。
 
 ### 2. SuperPower（AI 能力调度中枢）
 
