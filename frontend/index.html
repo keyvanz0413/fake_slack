@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Slackr</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- You can add your styles and scripts here -->
+  <link rel="stylesheet" type="text/css" media="screen" href="styles/provided.css" />
+</head>
+
+<body>
+  <!-- This is an example app structure, you can modify this as much as you choose -->
+  <header class="banner">
+    <button id="channel-board-button" class="btn-channel-toggle hidden">☰</button>
+    <h1>Slackr</h1>
+    <div class="dashboard-header hidden" id="dashboard-header">
+      <span class="user-name" id="avatar-label"></span>
+      <button id="logout-button" class="btn-logout">退出登录</button>
+    </div>
+  </header>
+  <main role="main">
+    <!-- Auth Container -->
+    <section class="auth-container">
+      <!-- Login Page -->
+      <div id="login-container" class="form-container">
+        <h2 class="form-title">登录您的账户</h2>
+        <form id="login-form">
+          <div class="auth-form-group">
+            <label for="login-email">邮箱</label>
+            <input type="email" id="login-email" name="email" placeholder="请输入邮箱地址" autocomplete="email" required />
+          </div>
+          <div class="auth-form-group">
+            <label for="login-password">密码</label>
+            <input type="password" id="login-password" name="password" placeholder="请输入密码" autocomplete="current-password" required />
+          </div>
+          <button type="submit" id="login-submit" class="login-btn">登录</button>
+        </form>
+        <div class="form-footer">
+          <p>第一次来？ <a href="#" id="register-link">加入我们！</a></p>
+          <p>忘记密码了？ <a href="#" id="forget-password-link">找回密码。</a></p>
+        </div>
+      </div>
+
+      <!-- Register Page -->
+      <div id="register-container" class="form-container hidden">
+        <h2 class="form-title">创建新账户</h2>
+        <form id="register-form">
+          <div class="auth-form-group">
+            <label for="register-name">姓名</label>
+            <input type="text" id="register-name" name="name" placeholder="请输入您的姓名" autocomplete="name" required />
+          </div>
+          <div class="auth-form-group">
+            <label for="register-email">邮箱</label>
+            <input type="email" id="register-email" name="email" placeholder="请输入您的邮箱" autocomplete="email" required />
+          </div>
+          <div class="auth-form-group">
+            <label for="register-password">密码</label>
+            <input type="password" id="register-password" name="password" placeholder="请输入您的密码" autocomplete="new-password" required />
+          </div>
+          <div class="auth-form-group">
+            <label for="register-password-confirm">确认密码</label>
+            <input type="password" id="register-password-confirm" name="password-confirm" placeholder="请再次确认您的密码" autocomplete="new-password" required />
+          </div>
+          <button type="submit" id="register-submit" class="register-btn">注册</button>
+        </form>
+        <div class="form-footer">
+          <p>已经有账户了？ <a href="#" id="login-link">立即登录！</a></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dashboard -->
+    <section id="dashboard-container" class="hidden">
+      <div class="dashboard-content">
+        <div class="channel-list-container"> 
+          <div class="channel-list-header">
+            <h2 id="channel-list-title">频道列表</h2>
+            <button id="create-channel-button" aria-label="新建频道">+ 新建</button>
+          </div>
+          <div class="channel-list-body">
+            <ul id="channel-list">
+               <!-- Populated by JS -->
+            </ul>
+          </div>
+        </div>
+
+        <div class="channel-chat-container">
+          <!-- Display when not in a channel -->
+          <div class="channel-chatbox-blank">
+            <h1>欢迎来到 Slackr！</h1>
+            <h2>选择一个频道并双击开始聊天</h2>
+          </div>
+
+          <!-- Display when in a channel -->
+          <div class="channel-chatbox-header">
+            <div class="channel-chatbox-header-left">
+              <div class="channel-chatbox-info">
+                <span id="channel-chatbox-channel-name">-</span>
+              </div>
+            </div>
+            <div class="channel-chatbox-header-right">
+              <div class="channel-chatbox-members">
+                <span id="channel-chatbox-members-icon">-</span>
+              </div>
+              <div class="channel-chatbox-actions">
+                <button id="invite-user-button">邀请</button>
+              </div>
+              <div class="channel-chatbox-actions">
+                <button id="leave-channel-button">离开</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Message banner -->
+          <div class="channel-chatbox-banner">
+            <button 
+              id="channel-chatbox-banner-toggle" 
+              class="pinned-banner-toggle"
+              aria-expanded="true"
+              aria-controls="pinned-messages-list"
+            >
+              <span class="pinned-banner-icon" aria-hidden="true">v</span>
+              <span class="pinned-banner-text">置顶消息</span>
+            </button>
+            <div id="pinned-messages-list" class="pinned-messages-list" role="region" aria-label="置顶消息">
+              <!-- Populated by JS: pinned-message-container -->
+            </div>
+          </div>
+
+          <!-- Message list -->
+          <div class="channel-chatbox-body">
+            <div class="channel-chatbox-messages" id="messages-list">
+              <!-- Populated by JS: message-container -->
+            </div>
+          </div>
+          <div class="channel-chatbox-input">
+            <div class="channel-chatbox-input-container">
+              <div class="chatbox-input-font-actions">
+                <button id="chatbox-input-font-bold" title="加粗 (Ctrl+B)" class="font-action-btn"><strong>B</strong></button>
+                <button id="chatbox-input-font-italic" title="斜体 (Ctrl+I)" class="font-action-btn"><em>I</em></button>
+                <button id="chatbox-input-font-underline" title="下划线 (Ctrl+U)" class="font-action-btn"><u>U</u></button>
+                <button id="chatbox-input-font-strikethrough" title="删除线" class="font-action-btn"><s>S</s></button>
+              </div>
+              <div id="message-input" class="rich-text-input" contenteditable="true" data-placeholder="在此输入您的消息..."></div>
+              <div class="chatbox-input-attachments">
+                <button id="chatbox-input-attachments-image">图片</button>
+                <button id="chatbox-input-attachments-file">文件</button>
+                <button id="chatbox-input-attachments-link">链接</button>
+                <div class="channel-chatbox-image">
+                  <img id="channel-chatbox-image-preview" src="#" alt="消息图片" />
+                  <input type="file" id="channel-chatbox-image-input" accept="image/jpeg,image/png,image/jpg" />
+                </div>
+              </div>
+              
+              <div class="chatbox-input-actions">
+                <button id="message-send-button">发送</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- Create Channel Modal -->
+    <div id="create-channel-container" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>创建新频道</h3>
+          <button id="create-channel-container-close" class="close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="create-channel-form">
+            <div class="channel-form-group">
+              <label for="create-channel-name">频道名称</label>
+              <input type="text" id="create-channel-name" name="name" placeholder="请输入频道名称" required />
+            </div>
+            <div class="channel-form-group">
+              <label for="create-channel-description">描述</label>
+              <textarea id="create-channel-description" name="description" placeholder="请输入频道描述" rows="3"></textarea>
+            </div>
+            <div class="channel-form-group">
+              <label for="create-channel-is-private">私有频道</label>
+              <input type="checkbox" id="create-channel-is-private" name="isPrivate" />
+            </div>
+            <button type="submit" id="create-channel-submit" class="btn-primary">创建频道</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Channel Details Modal -->
+    <div id="channel-details-container" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>频道详情</h3>
+          <button id="channel-details-close" class="close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          
+          <!-- Editable information form -->
+          <form id="channel-details-form">
+            <div class="channel-form-group">
+              <label for="channel-details-name">频道名称</label>
+              <input type="text" id="channel-details-name" placeholder="请输入频道名称" required />
+            </div>
+            <div class="channel-form-group">
+              <label for="channel-details-description">描述</label>
+              <textarea id="channel-details-description" placeholder="请输入频道描述" rows="3"></textarea>
+            </div>
+            
+          </form>
+
+          <hr class="channel-info-divider" />
+          <!-- Read-only information area -->
+          <div class="channel-info-readonly">
+            <div class="info-item">
+              <strong>频道类型</strong>
+              <span id="channel-details-type">-</span>
+            </div>
+            <div class="info-item">
+              <strong>创建者</strong>
+              <span id="channel-details-creator">-</span>
+            </div>
+            <div class="info-item">
+              <strong>创建日期</strong>
+              <span id="channel-details-create-date">-</span>
+            </div>
+          </div>
+          <button type="button" id="channel-details-save" class="btn-primary">保存修改</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- User Profile Modal -->
+    <div id="profile-container" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>用户资料</h3>
+          <button id="profile-close" class="close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="user-profile-info-left">
+            <img id="profile-image" src="#" alt="用户头像" />
+            <input type="file" id="profile-avatar-input" accept="image/jpeg,image/png,image/jpg" class="hidden-file-input" />
+            <button id="user-profile-avatar-upload" class="profile-edit">上传</button>
+          </div>
+          <div class="user-profile-info-right">
+            <div class="user-profile-info-item">
+              <strong>姓名</strong>
+              <span id="profile-name">-</span>
+              <input type="text" id="profile-name-input" class="profile-edit" placeholder="请输入姓名" />
+            </div>
+            <div class="user-profile-info-item">
+              <strong>个人简介</strong>
+              <span id="profile-bio">-</span>
+              <textarea id="profile-bio-input" class="profile-edit" placeholder="请输入个人简介" rows="3"></textarea>
+            </div>
+            <div class="user-profile-info-item">
+              <strong>邮箱</strong>
+              <span id="profile-email">-</span>
+              <input type="email" id="profile-email-input" class="profile-edit" placeholder="请输入邮箱" />
+            </div>
+            <div class="user-profile-info-item profile-edit">
+              <strong>新密码</strong>
+              <div class="password-input-wrapper">
+                <input type="password" id="profile-new-password-input" class="profile-edit" placeholder="请输入新密码" />
+                <button type="button" id="password-toggle-btn" class="password-toggle-btn">👁️</button>
+              </div>
+            </div>
+          </div>
+          <button type="button" id="profile-save" class="profile-edit">保存修改</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Invite Users Modal -->
+    <div id="channel-invite-container" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>邀请用户加入频道</h3>
+          <button id="invite-modal-close" class="close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="invite-user-list">
+            <div id="invite-users-list">
+              <!-- Dynamically populated by JS: user list -->
+            </div>
+          </div>
+          <button type="button" id="invite-submit-button" class="btn-primary">邀请所选用户</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error Modal -->
+    <div id="error-modal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>错误</h3>
+          <button id="error-close" class="close-btn">&times;</button>
+        </div>
+        <div id="error-body" class="modal-body"></div>
+      </div>
+    </div>
+
+    <!-- Image Modal -->
+    <div id="image-modal" class="image-modal hidden">
+      <button id="image-modal-close" class="image-modal-close">&times;</button>
+      <button id="image-modal-prev" class="image-modal-nav image-modal-prev">&lt;</button>
+      <img id="image-modal-img" class="image-modal-img" src="#" alt="原图" />
+      <button id="image-modal-next" class="image-modal-nav image-modal-next">&gt;</button>
+      <div id="image-modal-counter" class="image-modal-counter"></div>
+    </div>
+  </main>
+
+  <!-- Message Menu -->
+  <div id="global-message-menu" class="message-dropdown-menu">
+    <div class="message-menu-item">
+      <button class="message-edit-button" data-action="edit">编辑</button>
+    </div>
+    <div class="message-menu-item">
+      <button class="message-react-button" data-action="react">表情回应</button>
+    </div>
+    <div class="message-menu-item">
+      <button class="message-pin-button" data-action="pin">置顶</button>
+    </div>
+    <div class="message-menu-item">
+      <button class="message-delete-button" data-action="delete">删除</button>
+    </div>
+  </div>
+
+  <!-- Emoji Picker for Reactions -->
+  <div id="emoji-picker" class="emoji-picker">
+    <button class="emoji-option" data-emoji="Like">👍</button>
+    <button class="emoji-option" data-emoji="Love">❤️</button>
+    <button class="emoji-option" data-emoji="Sad">😢</button>
+    <button class="emoji-option" data-emoji="Happy">😊</button>
+    <button class="emoji-option" data-emoji="Angry">😠</button>
+    <button class="emoji-option" data-emoji="Surprise">😲</button>
+    <button class="emoji-option" data-emoji="Confused">😕</button>
+    <button class="emoji-option" data-emoji="Thinking">🤔</button>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <footer>
+    <p>&copy; Slackr</p>
+  </footer>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+
+</html>
